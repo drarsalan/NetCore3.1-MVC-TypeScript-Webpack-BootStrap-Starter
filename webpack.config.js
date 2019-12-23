@@ -1,5 +1,6 @@
 /// <binding />
 const path = require('path');
+const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CompressionPlugin = require('compression-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -16,16 +17,22 @@ module.exports = (env = {}, argv = {}) => {
             minimize: true
         },
         entry: {
-            main: './ClientApp/src/main.js'
+            'js/main': './ClientApp/src/main.ts',
+            'js/newJsPage' : './ClientApp/src/newJsPage.ts'
         },
         output: {
-            filename: isProd ? 'bundle-[chunkHash].js' : '[name].js',
-            path: path.resolve(__dirname, './wwwroot/dist'),
-            publicPath: "/dist/"
+            // filename: isProd ? 'bundle-[chunkHash].js' : '[name].js',
+            filename: '[name].js',
+            path: path.resolve(__dirname, './wwwroot'),
+            publicPath: "/"
         },
         plugins: [
+            new webpack.ProvidePlugin({
+                $: "jquery",
+                jQuery: "jquery"
+               }),
             new MiniCssExtractPlugin({
-                filename: isProd ? 'style-[contenthash].css' : 'style.css'
+                filename: isProd ? 'css/style-[contenthash].css' : 'css/style.css'
             }),
             new CompressionPlugin({
                 filename: '[path].gz[query]',
@@ -44,10 +51,15 @@ module.exports = (env = {}, argv = {}) => {
                     //	appName: AppConfig.App.Title
                     //}
                 }
-            ),
+            )
         ],
         module: {
             rules: [
+                {
+                    test: /\.tsx?$/,
+                    use: 'ts-loader',
+                    exclude: /node_modules/
+                },
                 {
                     test: /\.js$/,
                     exclude: /node_modules/,
